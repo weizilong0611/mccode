@@ -1,0 +1,95 @@
+<% layout('/layouts/default.html', {title: '数据浏览管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa icon-notebook"></i> ${text('数据浏览管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<% if(hasPermi('mc:mcTextfiledata:edit')){ %>
+					<a href="${ctx}/mc/mcTextfiledata/form" class="btn btn-default btnTool" title="${text('新增数据浏览')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcTextfiledata}" action="${ctx}/mc/mcTextfiledata/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('值')}：</label>
+					<div class="control-inline">
+						<#form:input path="value" maxlength="1024" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('地区编码')}：</label>
+					<div class="control-inline">
+						<#form:input path="areacode" maxlength="32" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('源文件地址')}：</label>
+					<div class="control-inline">
+						<#form:input path="filepath" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('文件Md5')}：</label>
+					<div class="control-inline">
+						<#form:input path="filemd5" maxlength="32" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('数据类型')}：</label>
+					<div class="control-inline">
+						<#form:input path="datetype" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('规则Id')}：</label>
+					<div class="control-inline">
+						<#form:input path="ruleid" maxlength="32" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text("值")}', name:'value', index:'a.value', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/mc/mcTextfiledata/form?id='+row.id+'" class="btnList" data-title="${text("编辑数据浏览")}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text("数据时间")}', name:'rowtime', index:'a.rowtime', width:150, align:"left"},
+		{header:'${text("地区名称")}', name:'areaname', index:'a.areacode', width:150, align:"left"},
+		{header:'${text("地区编码")}', name:'areacode', index:'a.areacode', width:150, align:"left"},
+		{header:'${text("源文件地址")}', name:'filepath', index:'a.filepath', width:150, align:"left"},
+		{header:'${text("文件Md5")}', name:'filemd5', index:'a.filemd5', width:150, align:"left"},
+		{header:'${text("更新日期")}', name:'updateDate', index:'a.update_date', width:150, align:"center"},
+		{header:'${text("数据类型")}', name:'datetype', index:'a.datetype', width:150, align:"left"},
+		{header:'${text("规则Id")}', name:'ruleid', index:'a.ruleid', width:150, align:"left"},
+		{header:'${text("操作")}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('mc:mcTextfiledata:edit')){ %>
+				actions.push('<a href="${ctx}/mc/mcTextfiledata/form?id='+row.id+'" class="btnList" title="${text("编辑数据浏览")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/mc/mcTextfiledata/delete?id='+row.id+'" class="btnList" title="${text("删除数据浏览")}" data-confirm="${text("确认要删除该数据浏览吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>

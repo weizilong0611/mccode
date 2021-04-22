@@ -1,0 +1,196 @@
+<% layout('/layouts/default.html', {title: '地图信息管理', libs: ['validate','ueditor']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header with-border">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text(mcMapinfo.isNewRecord ? '新增地图信息' : '编辑地图信息')}
+			</div>
+			<div class="box-tools pull-right">
+				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+			</div>
+		</div>
+		<#form:form id="inputForm" model="${mcMapinfo}" action="${ctx}/mc/mcMapinfo/save" method="post" class="form-horizontal">
+	
+			<% if (!mcMapinfo.isNewRecord){%>
+				<#form:hidden  path="treeCode"  />
+			<%}%>
+			
+			<#form:hidden path="isNewRecord"/>
+			
+			<div class="box-body">
+				<div class="form-unit">${text('基本信息')}</div>
+				<div class="row">
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4">${text('上级地图信息')}：</label>
+							<div class="col-sm-8">
+								<#form:treeselect id="parent" title="${text('上级地图信息')}"
+									path="parent.id" labelPath="parent.treeName"
+									url="${ctx}/mc/mcMapinfo/treeData?excludeCode=${mcMapinfo.id}"
+									class="" allowClear="true" canSelectRoot="true" canSelectParent="true"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required hide">*</span><i class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+															<#form:hidden path="menucode" maxlength="255" class="form-control"/>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+				<div class="row">
+	 
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required ">*</span> 
+								<%if( mcMapinfo.parent !=null && mcMapinfo.parent.treeLevel ==1 ){%>
+									年份
+								<%}else{%>
+									${text('图层名称')}
+								<%}%>
+								 ：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+									<#form:input path="treeName" maxlength="200" class="form-control required ${( mcMapinfo.parent!=null &&  (mcMapinfo.parent.treeLevel ==1))?' abc':''}"/>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required ">*</span> ${text('本级排序号')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+								<#form:input path="treeSort" class="form-control required digits"/>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				</div>
+				<%if( mcMapinfo.parent != null &&( mcMapinfo.parent.treeLevel >=2 ) ){%>
+				<div class="row">
+					
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('地图/图层地址')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+									<#form:input path="url" maxlength="1024" class="form-control"/>
+							</div>
+						</div>
+					</div>
+				</div>	 
+				<%}%>
+			 
+				
+				<%if( mcMapinfo.parent != null && mcMapinfo.parent.treeLevel >=2 ){%>
+				
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('地图设置')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+									<iframe id="mapConfigIframe" src="${ctxPath}/mapEditer.html"  class="col-sm-12" style="height:410px;padding:0px;margin:0px;" ></iframe>
+									<input type="hidden" name="mapaction" />
+									<script>
+											document.getElementById("mapConfigIframe").onload = function(){
+												var json = ${mcMapinfo.mapaction};
+												document.getElementById("mapConfigIframe").contentWindow.loadGridData(json);
+										    }; 
+									</script>
+									 
+							</div>
+						</div>
+					</div>
+				</div>
+								<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('图层信息')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+															<!-- <#form:textarea path="remarks" rows="4" maxlength="500" class="form-control" /> -->
+									<#form:ueditor path="note" name="text" maxlength="4000" height="200" simpleToolbars="false" readonly="false" outline="false"/>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<%}else  if(mcMapinfo != null && mcMapinfo.treeLevel!=null && mcMapinfo.treeLevel ==1){%>
+					<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('默认地图年份')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+									<#form:input path="mapaction" maxlength="200" class="form-control required"/> 
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('备注')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+								<#form:textarea path="remarks" rows="4" maxlength="500" class="form-control" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<%}else{%>
+				
+				<%}%>
+			</div>
+			<div class="box-footer">
+				<div class="row">
+					<div class="col-sm-offset-2 col-sm-10">
+						<% if (hasPermi('mc:mcMapinfo:edit')){ %>
+							<button type="submit" class="btn btn-sm btn-primary" id="btnSubmit"><i class="fa fa-check"></i> ${text('保 存')}</button>&nbsp;
+						<% } %>
+						<button type="button" class="btn btn-sm btn-default" id="btnCancel" onclick="js.closeCurrentTabPage()"><i class="fa fa-reply-all"></i> ${text('关 闭')}</button>
+					</div>
+				</div>
+			</div>
+		</#form:form>
+	</div>
+</div>
+<% } %>
+<script>
+$("#inputForm").validate({
+	submitHandler: function(form){
+	try{
+		var json = document.getElementById("mapConfigIframe").contentWindow.getGridValues();
+		$("[name='mapaction']").val(JSON.stringify(json));
+	}catch(e){}
+		js.ajaxSubmitForm($(form), function(data){
+			js.showMessage(data.message);
+			if(data.result == Global.TRUE){
+				js.closeCurrentTabPage(function(contentWindow){
+					contentWindow.$('#dataGrid').dataGrid('refreshTreeChildren',
+							$('#parentCode').val(), '${mcMapinfo.id}');
+				});
+			}
+		}, "json");
+    }
+});
+
+// 选择父级菜单回调方法
+function treeselectCallback(id, act, index, layero){
+	if (id == 'parent' && (act == 'ok' || act == 'clear')){
+		// 创建并初始化下一个节点信息，如：排序号、默认值
+		$.get('${ctx}/mc/mcMapinfo/createNextNode?parentCode='
+				+$('#parentCode').val(), function(data){
+			$('#treeSort').val(data.treeSort);
+		});
+	}
+}
+</script>

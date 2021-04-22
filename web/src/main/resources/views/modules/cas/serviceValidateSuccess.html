@@ -1,0 +1,18 @@
+<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
+    <cas:authenticationSuccess>
+        <cas:user>${loginCode}</cas:user>
+        <cas:attributes>
+                <cas:id>${loginCode}</cas:id>
+                <cas:sex>${sex}</cas:sex>
+                <cas:username>${userName}</cas:username>
+                <cas:authenticationMethod>com.jeesite.modules.cas.web.CASController</cas:authenticationMethod>
+                <cas:email>${email}</cas:email>
+                <cas:nickname></cas:nickname>
+                <cas:status>${status}</cas:status>
+                <cas:cellphone>${phone}</cas:cellphone>
+                <cas:usertype>${userType}</cas:usertype>
+                <cas:loginid>${loginCode}</cas:loginid>
+                <cas:password>${password}</cas:password>
+        </cas:attributes>
+    </cas:authenticationSuccess>
+</cas:serviceResponse>

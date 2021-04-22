@@ -1,0 +1,98 @@
+<% layout('/layouts/default.html', {title: 'app报告下载管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('app报告下载管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<% if(hasPermi('mc:mcAppReport:edit')){ %>
+					<a href="${ctx}/mc/mcAppReport/form" class="btn btn-default btnTool" title="${text('新增app报告下载')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcAppReport}" action="${ctx}/mc/mcAppReport/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('标题')}：</label>
+					<div class="control-inline">
+						<#form:input path="title" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('行政区划代码')}：</label>
+					<div class="control-inline width-120" >
+						<#form:treeselect id="areacode" title="${text('区域选择')}"
+							path="areacode" labelPath="areaname" 
+							url="${ctx}/sys/area/treeData" allowClear="true"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('子标题')}：</label>
+					<div class="control-inline">
+						<#form:input path="subtitle" maxlength="4096" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('状态')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="status" dictType="sys_search_status" blankOption="true" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('备注信息')}：</label>
+					<div class="control-inline">
+						<#form:input path="remarks" maxlength="500" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text('标题')}', name:'title', index:'a.title', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/mc/mcAppReport/form?id='+row.id+'" class="btnList" data-title="${text('编辑app报告下载')}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text('类型')}', name:'type', index:'a.type', width:150, align:"center", formatter: function(val, obj, row, act){
+			return js.getDictLabel(${@DictUtils.getDictListJson('app_report_type')}, val, '${text('未知')}', true);
+		}},
+		{header:'${text('行政区划')}', name:'areaname', index:'a.areaname', width:150, align:"center"},
+		{header:'${text('子标题')}', name:'subtitle', index:'a.subtitle', width:150, align:"left"},
+		{header:'${text('状态')}', name:'status', index:'a.status', width:150, align:"center", formatter: function(val, obj, row, act){
+			return js.getDictLabel(${@DictUtils.getDictListJson('sys_search_status')}, val, '${text('未知')}', true);
+		}},
+		{header:'${text('更新时间')}', name:'updateDate', index:'a.update_date', width:150, align:"center"},
+		{header:'${text('操作')}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('mc:mcAppReport:edit')){ %>
+				actions.push('<a href="${ctx}/mc/mcAppReport/form?id='+row.id+'" class="btnList" title="${text('编辑app报告下载')}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				if (row.status == Global.STATUS_NORMAL){
+					actions.push('<a href="${ctx}/mc/mcAppReport/disable?id='+row.id+'" class="btnList" title="${text('停用app报告下载')}" data-confirm="${text('确认要停用该app报告下载吗？')}"><i class="glyphicon glyphicon-ban-circle"></i></a>&nbsp;');
+				}
+				if (row.status == Global.STATUS_DISABLE){
+					actions.push('<a href="${ctx}/mc/mcAppReport/enable?id='+row.id+'" class="btnList" title="${text('启用app报告下载')}" data-confirm="${text('确认要启用该app报告下载吗？')}"><i class="glyphicon glyphicon-ok-circle"></i></a>&nbsp;');
+				}
+				actions.push('<a href="${ctx}/mc/mcAppReport/delete?id='+row.id+'" class="btnList" title="${text('删除app报告下载')}" data-confirm="${text('确认要删除该app报告下载吗？')}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>

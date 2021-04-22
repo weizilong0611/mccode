@@ -1,0 +1,42 @@
+2021-04-22 10:55:26.947 INFO  2136 [           main] [com.jeesite.modules.Application        ] - Starting Application on LAPTOP-016D6TUT with PID 2136 (D:\workspace\gn-workspace\web\src\main\webapp\WEB-INF\classes started by 86137 in D:\workspace\gn-workspace\web)
+2021-04-22 10:55:26.949 DEBUG 2136 [           main] [com.jeesite.modules.Application        ] - Running with Spring Boot v2.0.8.RELEASE, Spring v5.0.12.RELEASE
+2021-04-22 10:55:26.949 INFO  2136 [           main] [com.jeesite.modules.Application        ] - The following profiles are active: default
+2021-04-22 10:55:28.347 INFO  2136 [           main] [com.jeesite.common.config.Global       ] - Config files: [classpath:config/jeesite-core.yml, classpath:config/application.yml]
+2021-04-22 10:55:28.352 INFO  2136 [           main] [com.jeesite.common.config.Global       ] - Spring cache cluster mode: false, session manager name: J1CacheSession
+2021-04-22 10:55:29.514 INFO  2136 [           main] [com.jeesite.common.config.Global       ] - user.home: C:/Users/86137
+2021-04-22 10:55:29.515 INFO  2136 [           main] [com.jeesite.common.config.Global       ] - user.dir: D:/workspace/gn-workspace/web
+2021-04-22 10:55:29.515 INFO  2136 [           main] [com.jeesite.common.config.Global       ] - logPath: D:/workspace/gn-workspace/web/src/main/webapp/WEB-INF/classes
+
+   _____        ___  _   _           ___
+  |_   _|      / __'(_)_| |_        /   |
+  _ | | __  __ \___ | |_   _| __   / /| |
+ ( .| |/__\/__\ ___)| | | |_ /__\ / /_| |_
+  \___|\__.\__.|____|_| \___)\__.(____   _|  :: JeeSite V4.1.8 :: 
+======================================|_|==========================
+
+    欢迎使用 甘南生态可视化系统 V4.1
+
+    您当前的版本为社区版，官方网站：http://jeesite.com
+
+    机器码是：3083f6ba05fba1deec813023e74eba30
+    产品名称：甘南生态可视化系统
+    公司名称：mxbt
+
+===================================================================
+
+2021-04-22 10:55:29.541 DEBUG 2136 [           main] [com.jeesite.common.config.Global       ] - Update D:\workspace\gn-workspace\web\src\main\webapp\WEB-INF\classes\config\application.yml shiro.rememberMe.secretKey success.
+2021-04-22 10:55:30.058 DEBUG 2136 [           main] [com.jeesite.common.config.Global       ] - Update D:\workspace\gn-workspace\web\src\main\webapp\WEB-INF\classes\config\application.yml jdbc.password success.
+2021-04-22 10:55:30.301 DEBUG 2136 [           main] [c.j.common.datasource.RoutingDataSource] - Set default data source success.
+2021-04-22 10:55:30.578 DEBUG 2136 [           main] [com.jeesite.modules.Application$1      ] - Code archive: D:\maven\apache-maven-3.6.3\repo\org\springframework\boot\spring-boot\2.0.8.RELEASE\spring-boot-2.0.8.RELEASE.jar
+2021-04-22 10:55:30.579 DEBUG 2136 [           main] [com.jeesite.modules.Application$1      ] - Code archive: D:\maven\apache-maven-3.6.3\repo\org\springframework\boot\spring-boot\2.0.8.RELEASE\spring-boot-2.0.8.RELEASE.jar
+2021-04-22 10:55:30.579 DEBUG 2136 [           main] [com.jeesite.modules.Application$1      ] - Document root: D:\workspace\gn-workspace\web\src\main\webapp
+2021-04-22 10:55:30.616 INFO  2136 [           main] [o.s.b.w.embedded.tomcat.TomcatWebServer] - Tomcat initialized with port(s): 443 (https) 80 (http)
+2021-04-22 10:55:31.433 INFO  2136 [-Mapper-Refresh] [c.jeesite.common.mybatis.MapperRefresh ] - Mybatis mapper refresh check, start in 60 seconds.
+2021-04-22 10:55:34.578 DEBUG 2136 [           main] [com.jeesite.common.beetl.BeetlUtils    ] - Beetl config files: [classpath:/config/beetl-core.properties, classpath:/config/beetl.properties]
+2021-04-22 10:55:35.497 DEBUG 2136 [           main] [c.j.c.m.m.provider.SelectSqlProvider   ] - 2毫秒: SELECT a.`status` AS "status", a.`create_by` AS "createBy", a.`create_date` AS "createDate", a.`update_by` AS "updateBy", a.`update_date` AS "updateDate", a.`remarks` AS "remarks", a.`module_code` AS "moduleCode", a.`module_name` AS "moduleName", a.`description` AS "description", a.`main_class_name` AS "mainClassName", a.`current_version` AS "currentVersion", a.`upgrade_info` AS "upgradeInfo" FROM `js_sys_module` a WHERE a.`status` = #{sqlMap.where#status#EQ1} ORDER BY a.update_date DESC
+2021-04-22 10:55:35.506 DEBUG 2136 [           main] [o.m.s.t.SpringManagedTransaction       ] - JDBC Connection [com.alibaba.druid.proxy.jdbc.ConnectionProxyImpl@53c40ed6] will not be managed by Spring
+2021-04-22 10:55:35.523 DEBUG 2136 [           main] [c.j.modules.sys.dao.ModuleDao.findList ] - ==>  Preparing: SELECT a.`status` AS "status", a.`create_by` AS "createBy", a.`create_date` AS "createDate", a.`update_by` AS "updateBy", a.`update_date` AS "updateDate", a.`remarks` AS "remarks", a.`module_code` AS "moduleCode", a.`module_name` AS "moduleName", a.`description` AS "description", a.`main_class_name` AS "mainClassName", a.`current_version` AS "currentVersion", a.`upgrade_info` AS "upgradeInfo" FROM `js_sys_module` a WHERE a.`status` = ? ORDER BY a.update_date DESC 
+2021-04-22 10:55:35.538 DEBUG 2136 [           main] [c.j.modules.sys.dao.ModuleDao.findList ] - ==> Parameters: 0(String)
+2021-04-22 10:55:35.575 DEBUG 2136 [           main] [c.j.modules.sys.dao.ModuleDao.findList ] - <==      Total: 4
+2021-04-22 10:55:35.806 INFO  2136 [           main] [o.s.b.w.embedded.tomcat.TomcatWebServer] - Tomcat started on port(s): 443 (https) 80 (http) with context path '/wsq-web'
+2021-04-22 10:55:35.809 INFO  2136 [           main] [com.jeesite.modules.Application        ] - Started Application in 9.3 seconds (JVM running for 9.812)

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: JeeSite Web
+Implementation-Version: 4.1.8-SNAPSHOT
+Built-By: 86137
+Implementation-Vendor-Id: com.jeesite
+Build-Jdk: 1.8.0_181
+Implementation-URL: http://jeesite.com
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: JeeSite
+Main-Class: com.jeesite.modules.Application
+

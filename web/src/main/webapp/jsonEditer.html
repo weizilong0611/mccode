@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>JSON编辑器</title>
+	<link rel="stylesheet" type="text/css" href="./static/easyui/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="./static/easyui/themes/icon.css">
+	<script type="text/javascript" src="./static/easyui/jquery.min.js"></script>
+	<script type="text/javascript" src="./static/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="./static/easyui/plugins/jquery.color.js"></script>
+	<script type="text/javascript" >
+	
+	var Format = {
+		String:"text",
+		Color:"Color",
+		Object:"Object",
+		List:"List"
+	};
+	
+	var mapConfig = [
+			{
+				name:"lenged",
+				text:"图例",
+				type:Format.List,
+				format:(key)=>{
+					return {
+						type:key == "text" ? Format.String : Format.Color
+					}
+				}
+			},
+			{
+				name:"tip",
+				text:"地图点击操作",
+				type:Format.Object,
+				children:[
+					{
+						name:"type",
+						text:"表现形式",
+						format:()=>{
+							return {
+								type:Format.List,
+								items:[
+									{text:"图表",value:"chart"},{text:"属性",value:"tip"}
+								],
+								onSelect:function(val){
+									if(val == "chart"){
+										return {
+											 type:,
+									         rowtitle:"",
+									         category:"",
+									         areaname:"NAME2004",
+									         rowtime1:"datatime"
+										};
+									}else{
+										
+									}
+								}
+							};
+						}
+					}
+				]
+				
+			}
+		];
+	function parse(config){
+		for(var i=0;i<mapConfig.length;i++){
+			var item = mapConfig[i];
+			item.id = "Level1_" + i;
+			if(Format.List == item.type){
+				item.group = item.text;
+			}else if(Format.Object == item.type){
+				item.group = item.text;
+				for(var j=0;j<item.children.length;j++){
+					idseek++;
+					item.children[j].id = item.id + idseek;
+					item.children[j]._parentId = item.id ;
+				}
+			}
+		}
+		return config;
+	}
+	
+			
+	var onContexRightRow = null;
+	var idseek = 0;
+	$(function(){
+		
+		$.parser.auto = true;
+		$('#pg').treegrid({
+		    fit:true,
+		    treeField:"text",
+            idField: 'id',
+            collapsible: true,
+		    columns:[[
+		    /* 	{field:'group',title:'配置项',width:100}, */
+		    	{field:'text',title:'名称',width:200,formatter:formatInputT},
+		    	{field:'value',title:'值',width:200,formatter:formatInputV}
+		    ]],
+		    onContextMenu:function(e,node){
+
+		    	onContexRightRow = node;
+		    	
+		    	 e.preventDefault();
+		    	 
+		    	 $('#mm').empty();
+		    	 $('#mm').menu({
+		    		 hideOnUnhover:false,
+		    		 noline:true
+		    	 });
+
+		    	 if(Format.List == node.type){
+		    		 $('#mm').menu("appendItem",{
+	    			 	text: '添加' + node.text,
+    					iconCls: 'icon-add',
+    					onclick: function(){
+    						$('#pg').treegrid("append",{
+    							parent:onContexRightRow.id,
+    							data: [{
+    								id: onContexRightRow.id + (idseek++) ,
+    								text:  node.text ,
+    								value:"a",
+    								group:node.text,
+    								format:node.format
+    							}]
+    						});
+    					}
+		    		 });
+		    		 $('#mm').menu("appendItem",{
+		    			 	text: '编辑' + node.text,
+	    					iconCls: 'icon-edit',
+	    					onclick: function(){alert('提示：新菜单项！')}
+			    	});
+		    		 $('#mm').menu("appendItem",{
+		    			 	text: '删除' + node.text,
+	    					iconCls: 'icon-cancel',
+	    					onclick: function(){alert('提示：新菜单项！')}
+			    	});
+		    	 }
+		         $('#mm').menu('show', {
+		            left: e.pageX,
+					top: e.pageY
+		         });
+		    }
+		});
+		
+		
+		$("#pg").propertygrid("loadData",
+				parse(mapConfig)
+		);
+		
+	});
+	
+	function formatInputT(value,row,index){
+		return formatInput(value,row,index,"text");
+	}
+	function formatInputV(value,row,index){
+		return formatInput(value,row,index,"value");
+	}	
+	function formatInput(value,row,index,key){ 
+		if(row.type)return value; 
+		
+		if(row.format){
+			var format = row.format(key);
+			
+			idseek++;
+			setTimeout(()=>{
+				$.parser.parse($("#X"+idseek).parent());
+			},200);
+			
+			if(format.type== Format.Color){
+				return "<input id='X"+idseek+"' type='text' class='easyui-color' value='"+value+"' style='width:100%;'   />";
+			}else if(format.type== Format.List){
+				var html = "<select style='width:100%;'   >";
+				
+				for(var j=0;j<format.items.length;j++){
+					
+					var item = format.items[j];
+					
+					html += "<option value='"+item.value+"' >"+item.text+"</option>";
+				}
+				
+				html+="</select>";
+				return html;
+			}else{
+				return "<input id='X"+idseek+"'  type='text' value='"+value+"' style='width:100%;'   />";
+			}
+			
+			
+		}
+		return value;
+	}
+	
+	</script>
+	
+</head>
+<body>
+<div style="width:400px;height:400px;background-color:grey;">
+	<table id="pg" ></table>
+</div>
+<div id="mm" style="width:120px;">
+</div>
+</body>
+</html>

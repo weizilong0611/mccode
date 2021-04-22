@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<script type="text/javascript" src="${ctx}/static/jquery/jquery-1.12.4.min.js"></script>
+<title> </title>
+ 
+
+<script type="text/javascript">
+ 
+
+	 
+	$(function(){
+		
+		$("#xxx").on("load",function(){
+	//		window.open("http://154.8.139.52:8086/SellerAdmin/home/Console","_blank"); 
+		});
+		
+	//	$('#form1').attr('action','http://154.8.139.52:8086/Login');
+		$('#form1').submit();
+		
+	});
+</script>
+</head>
+<body>
+<center>
+<div style="background-color:#eee;">
+	...
+</div>
+</center>
+<div id="mainDiv" style="display:none;" >
+   <form id="form1" action="http://154.8.139.52:8086/Login/Login" target="target1" method="post">
+ 
+		<input type="text" name="username" value="ziying:shop" />
+		<input type="text" name="password" value="123456" />
+		<input type="text" name="checkCode" value="" />
+		<input type="text" name="keep" value="true" />
+		
+   </form>
+    <iframe id="xxx" name="target1" src="" ></iframe>
+	
+	</div> 
+</body>
+</html>

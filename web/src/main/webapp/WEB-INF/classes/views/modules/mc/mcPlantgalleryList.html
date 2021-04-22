@@ -1,0 +1,125 @@
+<% layout('/layouts/default.html', {title: '植物图册管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('植物图册管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<% if(hasPermi('mc:mcPlantgallery:edit')){ %>
+					<a href="${ctx}/mc/mcPlantgallery/form" class="btn btn-default btnTool" title="${text('新增植物图册')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcPlantgallery}" action="${ctx}/mc/mcPlantgallery/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('科中文名')}：</label>
+					<div class="control-inline">
+						<#form:input path="kecn" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('科拉丁名')}：</label>
+					<div class="control-inline">
+						<#form:input path="keld" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('科藏名')}：</label>
+					<div class="control-inline">
+						<#form:input path="kezm" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('属名')}：</label>
+					<div class="control-inline">
+						<#form:input path="shucn" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('属拉丁名')}：</label>
+					<div class="control-inline">
+						<#form:input path="shuld" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('属藏名')}：</label>
+					<div class="control-inline">
+						<#form:input path="shuzm" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('种中文名')}：</label>
+					<div class="control-inline">
+						<#form:input path="zhongcn" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('种拉丁名')}：</label>
+					<div class="control-inline">
+						<#form:input path="zhongld" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('种藏名')}：</label>
+					<div class="control-inline">
+						<#form:input path="zhongzm" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('内容介绍')}：</label>
+					<div class="control-inline">
+						<#form:input path="infotxt" maxlength="4000" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('备注信息')}：</label>
+					<div class="control-inline">
+						<#form:input path="remarks" maxlength="500" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text('科中文名')}', name:'kecn', index:'a.kecn', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/mc/mcPlantgallery/form?id='+row.id+'" class="btnList" data-title="${text('编辑植物图册')}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text('科拉丁名')}', name:'keld', index:'a.keld', width:150, align:"left"},
+		{header:'${text('科藏名')}', name:'kezm', index:'a.kezm', width:150, align:"left"},
+		{header:'${text('属名')}', name:'shucn', index:'a.shucn', width:150, align:"left"},
+		{header:'${text('属拉丁名')}', name:'shuld', index:'a.shuld', width:150, align:"left"},
+		{header:'${text('属藏名')}', name:'shuzm', index:'a.shuzm', width:150, align:"left"},
+		{header:'${text('种中文名')}', name:'zhongcn', index:'a.zhongcn', width:150, align:"left"},
+		{header:'${text('种拉丁名')}', name:'zhongld', index:'a.zhongld', width:150, align:"left"},
+		{header:'${text('种藏名')}', name:'zhongzm', index:'a.zhongzm', width:150, align:"left"}, 
+		{header:'${text('操作')}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('mc:mcPlantgallery:edit')){ %>
+				actions.push('<a href="${ctx}/mc/mcPlantgallery/form?id='+row.id+'" class="btnList" title="${text('编辑植物图册')}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/mc/mcPlantgallery/delete?id='+row.id+'" class="btnList" title="${text('删除植物图册')}" data-confirm="${text('确认要删除该植物图册吗？')}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>

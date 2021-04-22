@@ -1,0 +1,93 @@
+<% layout('/layouts/default.html', {title: '工作空间管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa icon-notebook"></i> ${text('工作空间管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<% if(hasPermi('mc:mcWorkspace:edit')){ %>
+					<a href="${ctx}/mc/mcWorkspace/form" class="btn btn-default btnTool" title="${text('新增工作空间')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcWorkspace}" action="${ctx}/mc/mcWorkspace/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('工作空间文件路径')}：</label>
+					<div class="control-inline">
+						<#form:input path="filepath" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('iserver地址')}：</label>
+					<div class="control-inline">
+						<#form:input path="iserverdat" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('可以储存一些iportal相关数据')}：</label>
+					<div class="control-inline">
+						<#form:input path="iportaldat" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('备注')}：</label>
+					<div class="control-inline">
+						<#form:input path="remarks" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('标签，使用分号分割')}：</label>
+					<div class="control-inline">
+						<#form:input path="tag" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text("工作空间文件路径")}', name:'filepath', index:'a.filepath', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/mc/mcWorkspace/form?id='+row.id+'" class="btnList" data-title="${text("编辑工作空间")}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text("可以储存一些iserver相关数据")}', name:'iserverdat', index:'a.iserverdat', width:150, align:"left"},
+		{header:'${text("可以储存一些iportal相关数据")}', name:'iportaldat', index:'a.iportaldat', width:150, align:"left"},
+		{header:'${text("备注")}', name:'remarks', index:'a.remarks', width:150, align:"left"},
+		{header:'${text("标签，使用分号分割")}', name:'tag', index:'a.tag', width:150, align:"left"},
+		{header:'${text("操作")}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('mc:mcWorkspace:edit')){ %>
+				actions.push('<a href="${ctx}/mc/mcWorkspace/form?id='+row.id+'" class="btnList" title="${text("编辑工作空间")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				if (row.status == Global.STATUS_NORMAL){
+					actions.push('<a href="${ctx}/mc/mcWorkspace/disable?id='+row.id+'" class="btnList" title="${text("停用工作空间")}" data-confirm="${text("确认要停用该工作空间吗？")}"><i class="glyphicon glyphicon-ban-circle"></i></a>&nbsp;');
+				} else if (row.status == Global.STATUS_DISABLE){
+					actions.push('<a href="${ctx}/mc/mcWorkspace/enable?id='+row.id+'" class="btnList" title="${text("启用工作空间")}" data-confirm="${text("确认要启用该工作空间吗？")}"><i class="glyphicon glyphicon-ok-circle"></i></a>&nbsp;');
+				}
+				actions.push('<a href="${ctx}/mc/mcWorkspace/delete?id='+row.id+'" class="btnList" title="${text("删除工作空间")}" data-confirm="${text("确认要删除该工作空间吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>
+
+</body>
+</html>

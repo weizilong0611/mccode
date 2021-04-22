@@ -1,0 +1,119 @@
+<% layout('/layouts/default.html', {title: '工作空间管理', libs: ['validate','fileupload']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header with-border">
+			<div class="box-title">
+				<i class="fa icon-note"></i> ${text(mcWorkspace.isNewRecord ? '新增工作空间' : '编辑工作空间')}
+			</div>
+			<div class="box-tools pull-right">
+				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+			</div>
+		</div>
+		<#form:form id="inputForm" model="${mcWorkspace}" action="${ctx}/mc/mcWorkspace/save" method="post" class="form-horizontal">
+			<div class="box-body">
+				<div class="form-unit">${text('基本信息')}</div>
+				<#form:hidden path="id"/>
+				<div class="row">
+					<div class="row">
+							<div class="col-xs-12">
+								<div class="form-group">
+									<label class="control-label col-sm-2">${text('附件上传')}：</label>
+									<div class="col-sm-10">
+										<#form:fileupload id="uploadFile" bizKey="${mcWorkspace.id}" bizType="mcWorkspace_file"
+										allowSuffixes="zip" maxUploadNum="1" isMini="true" 
+											uploadType="file" class="" readonly="false" />
+									</div>
+								</div>
+							</div>
+					</div>
+					<!-- <div class="row">
+						<div class="col-xs-12">
+							<div class="form-group">
+								<label class="control-label col-sm-2" title="">
+									<span class="required hide">*</span> ${text('工作空间文件路径')}：<i class="fa icon-question hide"></i></label>
+								<div class="col-sm-5">
+									<#form:textarea path="filepath" rows="4" maxlength="255" class="form-control"/>
+								</div>
+							</div>
+						</div>
+					</div> -->
+					<!-- <div class="row">
+						<div class="col-xs-12">
+							<div class="form-group">
+								<label class="control-label col-sm-2" title="">
+									<span class="required hide">*</span> ${text('可以储存一些iserver相关数据')}：<i class="fa icon-question hide"></i></label>
+								<div class="col-sm-5">
+									<#form:textarea path="iserverdat" rows="4" class="form-control"/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="form-group">
+								<label class="control-label col-sm-2" title="">
+									<span class="required hide">*</span> ${text('可以储存一些iportal相关数据')}：<i class="fa icon-question hide"></i></label>
+								<div class="col-sm-5">
+									<#form:textarea path="iportaldat" rows="4" class="form-control"/>
+								</div>
+							</div>
+						</div>
+					</div> -->
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="form-group">
+								<label class="control-label col-sm-2" title="">
+									<span class="required hide">*</span> ${text('备注')}：<i class="fa icon-question hide"></i></label>
+								<div class="col-sm-5">
+									<#form:textarea path="remarks" rows="4" maxlength="255" class="form-control"/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="form-group">
+								<label class="control-label col-sm-2" title="">
+									<span class="required hide">*</span> ${text('标签，使用分号分割')}：<i class="fa icon-question hide"></i></label>
+								<div class="col-sm-5">
+									<#form:textarea path="tag" rows="4" class="form-control"/>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+				<div class="box-footer">
+					<div class="row">
+						<div class="col-sm-offset-2 col-sm-10">
+							<% if (hasPermi('mc:mcWorkspace:edit')){ %>
+								<button type="submit" class="btn btn-sm btn-primary" id="btnSubmit"><i class="fa fa-check"></i> ${text('保 存')}</button>&nbsp;
+							<% } %>
+							<button type="button" class="btn btn-sm btn-default" id="btnCancel" onclick="js.closeCurrentTabPage()"><i class="fa fa-reply-all"></i> ${text('关 闭')}</button>
+						</div>
+					</div>
+				</div>
+		</#form:form>
+	</div>
+</div>
+<% } %>
+</div>
+<style>
+ 
+</style>
+<script>
+$("#inputForm").validate({
+	submitHandler: function(form){
+		js.ajaxSubmitForm($(form), function(data){
+			js.showMessage(data.message);
+			if(data.result == Global.TRUE){
+				js.closeCurrentTabPage(function(contentWindow){
+					contentWindow.page();
+				});
+			}
+		}, "json");
+    }
+});
+</script>
+</body>
+</html>

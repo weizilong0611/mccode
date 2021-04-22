@@ -1,0 +1,175 @@
+<% layout('/layouts/default.html', {title: '数据管理管理', libs: ['dataGrid','fileupload']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa icon-notebook"></i> ${text('数据管理管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<a href="#" class="btn btn-default" id="btnRefreshTree" title="${text('刷新')}"><i class="fa fa-refresh"></i> ${text('刷新')}</a>
+				<a href="#" class="btn btn-default" id="btnExpandTreeNode" title="${text('展开一级')}"><i class="fa fa-angle-double-down"></i> ${text('展开')}</a>
+				<a href="#" class="btn btn-default" id="btnCollapseTreeNode" title="${text('折叠全部')}"><i class="fa fa-angle-double-up"></i> ${text('折叠')}</a>
+				<% if(hasPermi('geo:mcGeofolder:edit')){ %>
+					<a href="${ctx}/geo/mcGeofolder/form" class="btn btn-default btnTool" title="${text('新增数据管理')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcGeofolder}" action="${ctx}/geo/mcGeofolder/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('节点名称')}：</label>
+					<div class="control-inline">
+						<#form:input path="treeName" maxlength="200" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('状态')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="status" dictType="sys_search_status" blankOption="true" class="form-control isQuick"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('文件类型')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="fileType" dictType="_geo_folder_fileType" blankOption="true" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('文件正则表达式')}：</label>
+					<div class="control-inline">
+						<#form:input path="fileRegex" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('文件规则')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="fileRule" dictType="_geo_folder_fileRule" blankOption="true" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('备注信息')}：</label>
+					<div class="control-inline">
+						<#form:input path="remarks" maxlength="500" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text("节点名称")}', name:'treeName', index:'a.tree_name', width:250, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/geo/mcGeofolder/form?treeCode='+row.treeCode+'" class="btnList" data-title="${text("编辑数据管理")}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text("节点目录")}', name:'treeCode', index:'a.treeCode', width:250, align:"left",formatter: function(val, obj, row, act){
+			var path ="" ;
+		 	//treeLevel
+		 	/* if(row.treeLevel ==2){
+		 		 
+		 	}else if(row.treeLevel == 3){
+		 		path = val;
+		 	}
+		 	 */
+		 	if(row.isTreeLeaf){
+		 		path = row.id;
+		 	}else if(row.treeLevel >= 1){
+		 		path = '${@EncodeUtils.encodeXml(@Global.getConfig("mc.geo.folder"))}' + "\\" + row.treeNames.replace(/\//g,"\\");
+		 	}
+		 	
+			return '<span>' + path +'</span>';
+		}},
+		{header:'${text("本级排序号")}', name:'treeSort', index:'a.tree_sort', width:150, align:"center"},
+		{header:'${text("状态")}', name:'status', index:'a.status', width:150, align:"center", formatter: function(val, obj, row, act){
+			return js.getDictLabel(${@DictUtils.getDictListJson('sys_search_status')}, val, '${text("未知")}', true);
+		}},
+		{header:'${text("更新时间")}', name:'updateDate', index:'a.update_date', width:150, align:"center"},
+		{header:'${text("文件类型")}', name:'fileType', index:'a.file_type', width:150, align:"center", formatter: function(val, obj, row, act){
+			return js.getDictLabel(${@DictUtils.getDictListJson('_geo_folder_fileType')}, val, '${text("未知")}', true);
+		}},
+		{header:'${text("文件正则表达式")}', name:'fileRegex', index:'a.file_regex', width:150, align:"left"},
+		{header:'${text("文件规则")}', name:'fileRule', index:'a.file_rule', width:150, align:"center", formatter: function(val, obj, row, act){
+			return js.getDictLabel(${@DictUtils.getDictListJson('_geo_folder_fileRule')}, val, '${text("未知")}', true);
+		}},
+		{header:'${text("备注信息")}', name:'remarks', index:'a.remarks', width:150, align:"left"},
+		{header:'${text("操作")}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			
+			if(row.isTreeLeaf){
+				actions.push('<a href="javascript:runTask(\''+row.id+'\')" title="${text("解析")}"><i class="fa icon-magic-wand"></i></a>&nbsp;');
+			//	actions.push('<a href="javascript:upload(\''+row.id+'\')" title="${text("上传文件")}"><i class="fa icon-upload"></i></a>&nbsp;');
+			}
+
+			<% if(hasPermi('geo:mcGeofolder:edit')){ %>
+				actions.push('<a href="${ctx}/geo/mcGeofolder/form?treeCode='+row.treeCode+'" class="btnList" title="${text("编辑数据管理")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/geo/mcGeofolder/delete?treeCode='+row.treeCode+'" class="btnList" title="${text("删除数据管理")}" data-confirm="${text("确认要删除该数据管理及所有子数据管理吗？")}" data-deltreenode="'+row.id+'"><i class="fa fa-trash-o"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/geo/mcGeofolder/form?parentCode='+row.id+'" class="btnList" title="${text("新增下级数据管理")}"><i class="fa fa-plus-square"></i></a>&nbsp;');
+			<% } %>
+			
+			
+			return actions.join('');
+		}}
+	],
+	treeGrid: true,			// 启用树结构表格
+	defaultExpandLevel: 0,	// 默认展开的层次
+	expandNodeClearPostData: 'treeName,fileType,fileRegex,fileRule,remarks,', // 展开节点清理请求参数数据（一般设置查询条件的字段属性，否则在查询后，不能展开子节点数据）
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+
+
+
+function runTask(id){
+	var url = "${ctx}/geo/mcGeofolder/runTask?id="+id;
+	$.ajax({
+		url:url,
+		method:"get",
+		success:function(data,code){
+			if(data.result == "true"){
+				alert(data.message);
+			}else{
+				alert(data.message);
+			}
+		}
+	}); 
+}
+/* function upload(id){
+	
+	layer.open({
+	  type: 1 //Page层类型
+	  ,area: ['400px', '200px']
+	  ,title: '上传Excel'
+	  ,btn:	["确认","关闭"],
+	  ,shade: 0.6 //遮罩透明度
+	  ,maxmin: true //允许全屏最小化
+	  ,anim: 1 //0-6的动画形式，-1不开启
+	  ,content: $("#uploaddiv")
+	});    
+	  
+} */
+
+</script>
+
+
+
+<div style="padding:10px;display:none;overflow:hidden;" id="uploaddiv" >
+	选择Excel文件
+	<#form:fileupload id="upload1" bizKey="tmpFile" bizType="user_upload1" uploadType="all" class="required" readonly="false"/>
+</div>
+
+
+
+</body>
+</html>

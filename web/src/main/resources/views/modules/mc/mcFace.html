@@ -1,0 +1,104 @@
+<% layout('/layouts/default.html', {title: '', libs: ['validate','fileupload']}){ %>
+<div class="main-content">
+	<div id="face-box">
+		<video id="video"></video>
+		<canvas id="canvas" style="display: none;"></canvas>
+	</div>
+</div>
+<% } %>
+
+<script>
+ 
+var video = document.getElementById("video");
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+var mediaStreamTrack=null;
+function success(stream){
+    //����webkit���������
+    // var CompatibleURL = window.URL || window.webkitURL;
+    //����Ƶ��ת��Ϊvideo��Դ
+    mediaStreamTrack=stream;
+    try {
+        // video.src = CompatibleURL.createObjectURL(stream);
+        video.srcObject=stream;
+    }catch (e) {
+        console.log("�����û�ý���豸ʧ�ܣ�",error.name,error.message);
+    }
+
+    video.play();//������Ƶ
+
+    //����Ƶ���Ƶ�canvas��
+}
+//����ص�����
+function error(error) {
+    console.log('�����û�ý��ʧ�ܣ�',error.name,error.message);
+}
+function getUserMediaToPhoto(constraints,success,error) {
+    if(navigator.mediaDevices.getUserMedia){
+        //���±�׼API
+        navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+    }else if (navigator.webkitGetUserMedia) {
+        //webkit���������
+        navigator.webkitGetUserMedia(constraints,success,error);
+    }else if(navigator.mozGetUserMedia){
+        //firefox�����
+        navigator.mozGetUserMedia(constraints,success,error);
+    }else if(navigator.getUserMedia){
+        //�ɰ�API
+        navigator.getUserMedia(constraints,success,error);
+    }
+}
+
+function getFace() {
+        context.drawImage(video,0,0,300,150);
+        this.img=canvas.toDataURL('image/jpg')
+       //��ȡ������base64����
+        this.img=img.split(',')[1];
+        return this.img;
+}
+function openUserMedia() {
+    if(navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.getUserMedia){
+        getUserMediaToPhoto({video:{width:480,height:320,facingMode: "user"}},success,error);
+    }else{
+        alert('����������֧�ַ����û�ý���豸');
+    }
+}
+function offUserMedia() {
+    if(mediaStreamTrack!=null)
+    mediaStreamTrack.getTracks()[0].stop();
+}
+
+openUserMedia();
+
+function Facelogin() {
+    setTimeout(function () {
+        img = getFace();
+        $.ajax({
+            type:"post",
+            url:"${ctxPath}/face/LoginServlet",
+            data:{
+                "imgpath":img,
+                "imgType":"BASE64"
+            },
+            success:function (data) {
+                var obj= new Function("return"+data)();
+                var result=obj.result;
+                var error_msg=obj.error_msg;
+                if("SUCCESS"===error_msg){
+                    sessionStorage.setItem("account",result.user_id);
+                    location.href="Main.html";
+                }
+                else{
+                    Facelogin();
+                }
+            },
+            error:function () {
+                alert("���ӷ�����ʧ��")
+            },
+            async:true
+        })
+    },500);
+}
+
+</script>
+ 

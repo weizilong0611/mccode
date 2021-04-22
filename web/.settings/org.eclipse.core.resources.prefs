@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/main/java=UTF-8
+encoding//src/main/resources=UTF-8
+encoding//src/main/resources/config/ueditor.json=UTF-8
+encoding//src/main/resources/views/modules/cas=UTF-8
+encoding//src/main/resources/views/modules/cas/casUserForm.html=UTF-8
+encoding//src/main/resources/views/modules/cas/casUserList.html=UTF-8
+encoding//src/main/resources/views/modules/mc/mcWorkspaceForm.html=UTF-8
+encoding//src/main/resources/views/modules/mc/mcWorkspaceList.html=UTF-8
+encoding//src/test/java=UTF-8
+encoding/<project>=UTF-8

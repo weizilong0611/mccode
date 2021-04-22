@@ -1,0 +1,95 @@
+<% layout('/layouts/default.html', {title: '意见举报管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('意见反馈管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i>
+					${text('查询')}</a>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcOpinion}" action="${ctx}/news/mcOpinion/listData" method="post"
+				class="form-inline hide" data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}"
+				data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('意见类型')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="opinionType" dictType="opinion_type" blankOption="true"
+							class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('反馈对象')}：</label>
+					<div class="control-inline width-120">
+						<#form:select path="targetName" dictType="opinion_targetname" blankOption="true"
+							class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('标题')}：</label>
+					<div class="control-inline">
+						<#form:input path="title" maxlength="100" class="form-control width-120" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('状态')}：</label>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+	// 初始化DataGrid对象
+	$('#dataGrid').dataGrid({
+		searchForm: $("#searchForm"),
+		columnModel: [
+			{
+				header: '${text('唯一值')}', name: 'title', index: 'a.title', width: 150, align: "left", frozen: true, formatter: function (val, obj, row, act) {
+					return '<a href="${ctx}/news/mcOpinion/form?id=' + row.id + '" class="btnList" data-title="${text('编辑意见反馈')}">' + (val || row.id) + '</a>';
+				}
+			},
+			{
+				header: '${text('意见类型')}', name: 'opinionType', index: 'a.opinion_type', width: 150, align: "center", formatter: function (val, obj, row, act) {
+					return js.getDictLabel(${@DictUtils.getDictListJson('opinion_type')
+				}, val, '${text('未知')}', true);
+		}},
+	{
+		header: '${text('反馈对象')}', name: 'targetName', index: 'a.target_name', width: 150, align: "center", formatter: function (val, obj, row, act) {
+			return js.getDictLabel(${@DictUtils.getDictListJson('opinion_targetname')
+		}, val, '${text('未知')}', true);
+	}},
+	// { header: '${text('名称')}', name: 'name', index: 'a.name', width: 150, align: "left" },
+	// { header: '${text('联系电话')}', name: 'phone', index: 'a.phone', width: 150, align: "left" },
+	{
+		header: '${text('状态')}', name: 'opinionState', index: 'a.opinionState', width: 150, align: "center", formatter: function (val, obj, row, act) {
+			return js.getDictLabel(${@DictUtils.getDictListJson('opinion_state')
+		}, val, '${text('未知')}', true);
+	}},
+	{ header: '${text('举报时间')}', name: 'createDate', index: 'a.createDate', width: 150, align: "center" },
+	{
+		header: '${text('操作')}', name: 'actions', width: 120, sortable: false, title: false, formatter: function(val, obj, row, act) {
+			var actions = [];
+			<% if (hasPermi('news:mcOpinion:edit')) { %>
+				actions.push('<a href="${ctx}/news/mcOpinion/form?id=' + row.id + '" class="btnList" title="${text('查看意见反馈')}"><i class="fa fa-search"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/news/mcOpinion/delete?id=' + row.id + '" class="btnList" title="${text('删除意见反馈')}" data-confirm="${text('确认要删除意见反馈吗？')}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}
+	}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data) {
+
+	}
+});
+</script>

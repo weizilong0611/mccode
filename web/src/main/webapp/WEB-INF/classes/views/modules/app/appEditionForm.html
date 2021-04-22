@@ -1,0 +1,120 @@
+<% layout('/layouts/default.html', {title: 'app版本管理', libs: ['validate','fileupload']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header with-border">
+			<div class="box-title">
+				<i class="fa icon-note"></i> ${text(appEdition.isNewRecord ? '新增app版本' : '编辑app版本')}
+			</div>
+			<div class="box-tools pull-right">
+				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+						class="fa fa-minus"></i></button>
+			</div>
+		</div>
+		<#form:form id="inputForm" model="${appEdition}" action="${ctx}/app/appEdition/save" method="post"
+			class="form-horizontal">
+			<div class="box-body">
+				<div class="form-unit">${text('基本信息')}</div>
+				<#form:hidden path="id" />
+				<div class="row">
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required ">*</span> ${text('版本号')}：<i
+									class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+								<#form:input path="editionId" maxlength="10" class="form-control required" />
+							</div>
+						</div>
+					</div>
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required ">*</span> ${text('版本名称')}：<i
+									class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+								<#form:input path="editionName" maxlength="64" class="form-control required" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required ">*</span> ${text('App类型')}：<i
+									class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+								<#form:select path="appType" dictType="app_type" class="form-control required " />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('更新内容')}：<i
+									class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+								<#form:textarea path="updateTxt" rows="4" maxlength="500" class="form-control" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required hide">*</span> ${text('下载次数')}：<i
+									class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+								<#form:input path="totalDownloads" maxlength="10" class="form-control digits" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<#form:hidden path="filePath" />
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2">
+								<span class="required hide">*</span> ${text('Apk上传')}：</label>
+							<div class="col-sm-10">
+								<#form:fileupload id="uploadFile" bizKey="${appEdition.id}" bizType="appEdition_file"
+									filePathInputId="filePath" returnPath="true" uploadType="all" class=""
+									readonly="false" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="box-footer">
+				<div class="row">
+					<div class="col-sm-offset-2 col-sm-10">
+						<% if (hasPermi('app:appEdition:edit')){ %>
+						<button type="submit" class="btn btn-sm btn-primary" id="btnSubmit"><i class="fa fa-check"></i>
+							${text('保 存')}</button>&nbsp;
+						<% } %>
+						<button type="button" class="btn btn-sm btn-default" id="btnCancel"
+							onclick="js.closeCurrentTabPage()"><i class="fa fa-reply-all"></i> ${text('关 闭')}</button>
+					</div>
+				</div>
+			</div>
+		</#form:form>
+	</div>
+</div>
+<% } %>
+<script>
+	$("#inputForm").validate({
+		submitHandler: function (form) {
+			js.ajaxSubmitForm($(form), function (data) {
+				js.showMessage(data.message);
+				if (data.result == Global.TRUE) {
+					js.closeCurrentTabPage(function (contentWindow) {
+						contentWindow.page();
+					});
+				}
+			}, "json");
+		}
+	});
+</script>

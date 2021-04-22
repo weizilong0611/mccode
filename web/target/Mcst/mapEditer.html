@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>JSON编辑器</title>
+	<link rel="stylesheet" type="text/css" href="./static/easyui/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="./static/easyui/themes/icon.css">
+	<script type="text/javascript" src="./static/easyui/jquery.min.js"></script>
+	<script type="text/javascript" src="./static/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="./static/easyui/plugins/jquery.color.js"></script>
+<!-- 	<script type="text/javascript" src="./static/easyui/plugins/datagrid-cellediting.js"></script> -->
+
+	<style>
+		html,body{
+			height:100%;
+			width:100%;
+			overflow:hidden;
+			padding:0px;
+		}
+	</style>
+
+	<script type="text/javascript" >
+	
+	
+	$.extend($.fn.validatebox.defaults.rules, {
+	    layerName: {
+	        validator: function(value, param){
+	            return value.indexOf("@") > 0 && value.indexOf("@")+1 < value.length ;
+	        },
+	        message: '请输入正确的图层名称（例：abc@datasource）'
+	    }
+	});
+	
+	
+	var Format = {
+		String:"text",
+		Color:"Color",
+		Object:"Object",
+		List:"List"
+	};
+	
+	var mapConfig = [
+			{
+				name:"lenged",
+				text:"图例",
+				evalData:function(ret){
+					ret.lenged = [];
+		
+					for(var i=0;i<this.children.length;i++){
+						ret.lenged.push({
+							title:this.children[i].text,
+							color:this.children[i].value
+						});
+					} 
+				},
+				parseData:function(dat){
+					for(var i=0;i<dat.lenged.length;i++){
+						this.children.push({
+							text:dat.lenged[i].title,
+							value:dat.lenged[i].color
+						});	
+					}
+				},
+				childFormat:{txtType:"STRING",defTxt:"名称",valueType:"COLOR",defVal:"#ff0000",onMouseRight:showDelMenu},
+				onMouseRight:showAddMenu,
+				children:[
+				]
+			},{
+				name:"isColorList",
+				text:"图例模式",
+				value:"icon",
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'combobox', 
+					options:{  
+	            	   data: [
+	            		   {value:'icon',text:'色标'},
+	                       {value:'coloList',text:'色带'}
+	            	   ],
+                       valueField: "value",
+                       textField: "text"
+					}
+				}
+			},
+			{
+				name:"tip",
+				text:"地图弹窗", 
+				evalData:function(ret){
+					ret.tip = {};
+					ret.tip.type = this.children[0].value;
+					ret.tip.config = [];	
+					ret.tip.highlight = [];
+					for(var i=0;i<this.children[1].children.length;i++){
+						var item = this.children[1].children[i];
+						if(item.isGl)ret.tip.highlight.push(item.text);
+						ret.tip.config[i] = {
+								label:item.text ,
+								value:item.value
+						};
+					}
+				},
+				parseData:function(dat){
+					this.children[0].value = dat.tip.type;
+					this.children[1].children = [];
+					var i=0;
+					if(Array.isArray(dat.tip.config)){
+					//for(var key in dat.tip.config){
+						for(var i=0;i< dat.tip.config.length;i++){
+							var key = dat.tip.config[i].label;
+							var value = dat.tip.config[i].value;
+							this.children[1].children.push({
+								text :  key,
+								value: value//dat.tip.config[key]
+							});
+						}
+					}else{
+						for(var key in dat.tip.config){
+							this.children[1].children.push({
+								text :  key,
+								value:dat.tip.config[key]
+							});
+						}
+					}
+				},
+				children:[
+					{
+						name:"type",
+						text:"弹窗类型",
+						value:"chart",
+						onMouseRight:showEditMenu,
+						editor:{
+							type:'combobox', 
+							options:{  
+			            	   data: [
+			            		   {value:'chart',text:'图表'},
+			                       {value:'text',text:'文字'},
+			                       {value:'auto',text:'自动'}
+			            	   ],
+	                           valueField: "value",
+	                           textField: "text"
+							}
+						}
+					},{
+						name:"config",
+						text:"配置",
+						childFormat:{txtType:"STRING",defTxt:"字段",valueType:"STRING",defVal:"",onMouseRight:showDelMenu},
+						onMouseRight:showAddMenu,
+						children:[
+							{text:"text",value:"value"}
+						]
+					} 
+				]
+			},
+			{
+				name:"layerType",
+				text:"图层类型",
+				value:"POINT",
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'combobox', 
+					options:{  
+	            	   data: [
+	            		   {value:'REGION',text:'面图层'},
+	                       {value:'POINT',text:'点图层'}
+	            	   ],
+                       valueField: "value",
+                       textField: "text"
+					}
+				}
+			},{
+				name:"optional",
+				text:"是否启用鼠标效果",
+				value:false,
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'combobox', 
+					options:{  
+	            	   data: [
+	            		   {value:false,text:'false'},
+	                       {value:true,text:'true'}
+	            	   ],
+                       valueField: "value",
+                       textField: "text"
+					}
+				}
+			},{
+				name:"layerName",
+				text:"图层名称",
+				value:"@",
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'validatebox', 
+					options:{  
+						validType:'layerName'
+					}
+				}
+			},{
+				name:"identification",
+				text:"唯一标识",
+				value:"",
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'validatebox',options:{}
+				}
+			},{
+				name:"selected",
+				text:"默认显示",
+				value:"false",
+				onMouseRight:showEditMenu,
+				editor:{
+					type:'combobox', 
+					options:{  
+	            	   data: [
+	            		   {value:'true',text:'是'},
+	                       {value:'false',text:'否'}
+	            	   ],
+                       valueField: "value",
+                       textField: "text"
+					}
+				}
+			}
+		];
+	function loadGridData(dat){
+
+		var tmpMapConfig =$.extend(true, [], mapConfig) ;//$.extend(mapConfig,{});
+		for(var i=0;i<tmpMapConfig.length;i++){
+			try{
+				if(tmpMapConfig[i].parseData){
+					tmpMapConfig[i].parseData(dat);
+				}else{
+					tmpMapConfig[i].value = dat[tmpMapConfig[i].name];
+				}
+			}catch(e){
+				
+			}
+		}
+		
+		$("#pg").treegrid("loadData",[]);
+		
+		$("#pg").treegrid("loadData",
+				parse(tmpMapConfig)
+		);
+	}
+	function getGridValues(){
+		var data = $("#pg").treegrid("getData");
+		var ret = {};
+		for(var i=0;i<data.length;i++){
+			if(data[i].evalData){
+				data[i].evalData(ret);
+			}else{
+				ret[data[i].name] = data[i].value;
+			} 
+		}
+		return ret;
+	}
+	
+	function copyAttr(target,source){
+		if(null == source ) return;
+		
+		for(var key in source){
+			target[key] = source[key];
+		}
+	}
+	function parse(config){
+		
+		
+		for(var i=0;i<config.length;i++){
+			var item = config[i];
+			
+		 
+			item.id = "Level1_" + i;
+			if(item.children){
+				for(var j=0;j<item.children.length;j++){
+					idseek++;
+					item.children[j].id = item.id + idseek;
+					item.children[j]._parentId = item.id ;
+					copyAttr(item.children[j],item.childFormat);
+					if(item.children[j].children && item.children[j].children.length > 0){
+						for(var x = 0;x<item.children[j].children.length;x++){
+							if(item.children[j].childFormat){
+								item.children[j].children[x].onMouseRight = 		item.children[j].childFormat.onMouseRight;
+							}
+							item.children[j].children[x].id = item.children[j].id + "_"+x; 
+						}
+					}
+				}
+			}
+		}
+		return config;
+	}
+	
+			
+	var onContexRightRow = null;
+	var idseek = 0;
+	$(function(){
+		$('#pg').treegrid({
+		    fit:true,
+		    treeField:"text",
+            idField: 'id',
+		    columns:[[
+		    /* 	{field:'group',title:'配置项',width:100}, */
+		    	{field:'text',title:'名称',width:200},
+		    	{field:'value',title:'值',width:200,formatter:function(val,row,idx){
+		    		if(val && val .indexOf("#") == 0){
+		    			return "<div style=\"background-color:"+val+"\">"+val+"</div>";
+		    		}
+		    		return val;
+		    	}}
+		    ]],
+		    onContextMenu:function(e,node){
+		    	onContexRightRow = node;
+		    	 e.preventDefault();
+		    	 if(node.onMouseRight)
+		    	 	node.onMouseRight(e);
+		    }
+		});
+	 
+		
+		$("#pg").treegrid("loadData",
+				parse(mapConfig)
+		);
+		
+	});
+	
+	function showEditMenu(e){
+		 $('#mm').empty();
+	   	 $('#mm').menu({
+	   		 hideOnUnhover:false,
+	   		 noline:true
+	   	 });
+	   	 $('#mm').menu("appendItem",{
+				 	text: '编辑' + onContexRightRow.text,
+					iconCls: 'icon-edit',
+					onclick: function(){
+						$("#fieldNameE").html(getControl("LABEL",onContexRightRow.text));
+						$("#controlE").html(buildEditor(onContexRightRow.editor,onContexRightRow.value));
+					
+						$.parser.parse($("#editorDialogEdit"));
+						$("#editorDialogEdit").dialog("open");
+					}
+			});
+	   	 
+	        $('#mm').menu('show', {
+	           left: e.pageX,
+				top: e.pageY
+	        });
+	
+	} 
+	function showAddMenu(e){
+		 $('#mm').empty();
+    	 $('#mm').menu({
+    		 hideOnUnhover:false,
+    		 noline:true
+    	 });
+    	 
+		$('#mm').menu("appendItem",{
+		 	text: '添加' + onContexRightRow.text,
+			iconCls: 'icon-add',
+			onclick: function(){
+		
+				$("#fieldName").html(getControl(onContexRightRow.childFormat.txtType,onContexRightRow.childFormat.defTxt));
+				$("#control").html(getControl(onContexRightRow.childFormat.valueType,onContexRightRow.childFormat.defVal));
+			
+				$.parser.parse($("#editorDialog"));
+				
+				$("#editorDialog").dialog("open");
+
+			}
+		 }); 
+         $('#mm').menu('show', {
+            left: e.pageX,
+			top: e.pageY
+         });
+	}
+	
+	function showDelMenu(e){
+		 $('#mm').empty();
+    	 $('#mm').menu({
+    		 hideOnUnhover:false,
+    		 noline:true
+    	 });
+    	 $('#mm').menu("appendItem",{
+			 	text: '编辑' + onContexRightRow.text,
+				iconCls: 'icon-edit',
+				onclick: function(){
+					
+					$("#fieldNameE").html(getControl(onContexRightRow.txtType,onContexRightRow.text));
+					$("#controlE").html(getControl(onContexRightRow.valueType,onContexRightRow.value));
+				
+					$.parser.parse($("#editorDialogEdit"));
+					$("#editorDialogEdit").dialog("open");
+				}
+		});
+    	 $('#mm').menu("appendItem",{
+			 	text: '删除' + onContexRightRow.text,
+				iconCls: 'icon-cancel',
+				onclick: function(){
+					$('#pg').treegrid('remove',onContexRightRow.id);
+				}
+		});
+    	  
+    	 if(onContexRightRow.isGl){
+	    	 $('#mm').menu("appendItem",{
+			 	text: '删除' + onContexRightRow.text,
+				iconCls: 'icon-point',
+				onclick: function(){
+					$('#pg').treegrid('remove',onContexRightRow.id);
+				}
+			});
+    	 }else{
+	    	 $('#mm').menu("appendItem",{
+			 	text: '高亮' + onContexRightRow.text,
+				iconCls: 'icon-point',
+				onclick: function(){
+					onContexRightRow.isGl = true;
+				}
+			});
+	    	 
+	    	 $('#mm').menu("appendItem",{
+				 	text: '向上移动-' + onContexRightRow.text,
+					iconCls: 'icon-up',
+					onclick: function(){
+						//onContexRightRow.isGl = true;
+						move("up");
+						loadGridData(
+							getGridValues()
+						)
+					}
+				});
+	    	 
+	    	 $('#mm').menu("appendItem",{
+				 	text: '向下移动-' + onContexRightRow.text,
+					iconCls: 'icon-down',
+					onclick: function(){
+						move("down");
+						loadGridData(
+								getGridValues()
+							)
+					}
+				});
+    	 }
+    	 
+         $('#mm').menu('show', {
+            left: e.pageX,
+			top: e.pageY
+         });
+	
+	}
+
+	function getControl(type,val){
+		if(type == "COLOR"){ 
+			return "<input type='text' class='easyui-textbox' value='"+val+"' data-options='width:80,editable:true' />"; 
+		}else if(type == "LABEL"){
+			return val;
+		}
+		return "<input type='text' class='easyui-textbox' value='"+val+"'  data-options='width:80' />";
+	}
+	function buildEditor(editor,val){
+ 
+		var control = "<input type='text'  />";
+		if(editor.type == "combobox"){
+			editor.options.value = val;
+			return "<input type='text' class='easyui-combobox' value='"+val+"' data-options='"+JSON.stringify(editor.options)+"'  />";
+		}else if(editor.type == "validatebox"){
+			return "<input type='text' class='easyui-textbox' value='"+val+"'  data-options='"+JSON.stringify(editor.options)+"'  />";
+		}
+	}
+	
+	
+
+	function move(o) {//将此方法加入上下移的按钮事件即可
+		//var n = $('#pg').treegrid("getSelected");if(n==null){alert("无法移动！");return;};
+		var n = onContexRightRow;
+						//debugger;
+		var selectRow = $('#pg_datagrid-row-r1-2-'+n.id);
+		if(o=="up") {
+			//var pre = selectRow.prev();//此处获得上一节点，关键
+			var pre = selectRow.parent().parent().prev().find("tr");
+			if(pre.length == 0)pre = selectRow.prev();
+			// alert(typeof(pre.attr("node-id"))=="undefined");return;
+			if(typeof(pre.attr("node-id"))=="undefined" || pre.attr("node-id").indexOf("L")==-1) {
+				alert("无法移动！");
+			}else {//下面写数据库中的排序逻辑
+				var preId = pre.attr("node-id");
+				var n2 = $('#pg').treegrid("pop",n.id);
+				$('#pg').treegrid("insert",{before:preId,data:n2});
+				$('#pg').treegrid("select",n.id);
+			}
+		}else if(o=="down") {
+			//var next = selectRow.next();//此处获得下一节点，关键
+			var next = selectRow.parent().parent().next().find("tr");
+			if(next.length == 0)next = selectRow.next();
+			//alert(next.attr("node-id"));return;
+			if(typeof(next.attr("node-id"))=="undefined" || next.attr("node-id").indexOf("L")==-1) {
+				alert("无法移动！")
+			}else {
+				var nextId = next.attr("node-id");
+				var n2 = $('#pg').treegrid("pop",nextId);
+				$('#pg').treegrid("insert",{before:n.id,data:n2})
+			}
+		}
+	}
+	</script>
+	
+</head>
+<body>
+<div style="background-color:grey;width:100%;height:100%;">
+	<table id="pg" ></table>
+</div>
+<div id="mm" style="width:120px;"></div>
+<div id="editorDialog" class="easyui-dialog" data-options="width:300,height:140,title:'属性设置',modal:true,closed:true,buttons:[{
+				text:'保存',
+				handler:function(){
+					$('#pg').treegrid('append',{
+						parent:onContexRightRow.id,
+						data: [{
+							id: onContexRightRow.id + (idseek++) ,
+							text:  $('#fieldName input').val() ,
+							value: $('#control input').val(),
+							onMouseRight:onContexRightRow.childFormat.onMouseRight
+						}]
+					});
+					
+					$('#editorDialog').dialog('close');
+				}
+			},{
+				text:'取消',
+				handler:function(){
+					$('#editorDialog').dialog('close');
+				}
+			}]" >
+	<table style="padding:5px;">
+		<tr>
+			<td id="fieldName"></td>
+			<td id="control"></td>
+		</tr>
+	</table>
+</div>
+<div id="editorDialogEdit" class="easyui-dialog" data-options="width:300,height:140,title:'属性设置',modal:true,closed:true,buttons:[{
+				text:'保存',
+				handler:function(){
+					$('#pg').treegrid('update',{
+						id:onContexRightRow.id,
+						row: {
+							text:  $('#fieldNameE input').val() ,
+							value: $('#controlE input').val()
+						}
+					});
+					
+					$('#editorDialogEdit').dialog('close');
+				}
+			},{
+				text:'取消',
+				handler:function(){
+					$('#editorDialogEdit').dialog('close');
+				}
+			}]" >
+	<table style="padding:5px;">
+		<tr>
+			<td id="fieldNameE"></td>
+			<td id="controlE"></td>
+		</tr>
+	</table>
+</div>
+
+</body>
+</html>

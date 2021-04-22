@@ -1,0 +1,114 @@
+<% layout('/layouts/default.html', {title: '水电站流量管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('水电站流量管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+				<% if(hasPermi('mc:mcEmp:edit')){ %>
+					<a href="${ctx}/mc/mcEmp/form" class="btn btn-default btnTool" title="${text('新增水电站流量')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+				<% } %>
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${mcEmp}" action="${ctx}/mc/mcEmp/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('水电站')}：</label>
+					<div class="control-inline">
+						<#form:input path="hyName" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('所在位置')}：</label>
+					<div class="control-inline">
+						<#form:input path="hyAddress" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('生态流量 ')}：</label>
+					<div class="control-inline">
+						<#form:input path="ecologyOutFlow" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('运行情况')}：</label>
+					<div class="control-inline">
+						<#form:input path="buildDondation" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('开发方式')}：</label>
+					<div class="control-inline">
+						<#form:input path="developmentMode" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('类型')}：</label>
+					<div class="control-inline">
+						<#form:input path="empType" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('引水流量 ')}：</label>
+					<div class="control-inline">
+						<#form:input path="inFlow" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('时间')}：</label>
+					<div class="control-inline">
+						<#form:input path="collectionTime" readonly="true" maxlength="20" class="form-control Wdate-datetime"
+							dataFormat="datetime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm',isShowClear:false});"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('区域代码')}：</label>
+					<div class="control-inline">
+						<#form:input path="areacode" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text('水电站')}', name:'hyName', index:'a.hy_name', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+			return '<a href="${ctx}/mc/mcEmp/form?id='+row.id+'" class="btnList" data-title="${text('编辑水电站流量')}">'+(val||row.id)+'</a>';
+		}},
+		{header:'${text('所在位置')}', name:'hyAddress', index:'a.hy_address', width:150, align:"left"},
+		{header:'${text('生态流量 ')}', name:'ecologyOutFlow', index:'a.ecology_out_flow', width:150, align:"left"},
+		{header:'${text('运行情况')}', name:'buildDondation', index:'a.build_dondation', width:150, align:"left"},
+		{header:'${text('开发方式')}', name:'developmentMode', index:'a.development_mode', width:150, align:"left"},
+		{header:'${text('类型')}', name:'empType', index:'a.emp_type', width:150, align:"left"},
+		{header:'${text('引水流量 ')}', name:'inFlow', index:'a.in_flow', width:150, align:"left"},
+		{header:'${text('时间')}', name:'collectionTime', index:'a.collection_time', width:150, align:"left"},
+		{header:'${text('区域代码')}', name:'areacode', index:'a.areacode', width:150, align:"left"},
+		{header:'${text('操作')}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('mc:mcEmp:edit')){ %>
+				actions.push('<a href="${ctx}/mc/mcEmp/form?id='+row.id+'" class="btnList" title="${text('编辑水电站流量')}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/mc/mcEmp/delete?id='+row.id+'" class="btnList" title="${text('删除水电站流量')}" data-confirm="${text('确认要删除该水电站流量吗？')}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>
